@@ -36,7 +36,7 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      backdrop-filter: blur(1px);
+      padding: 20px;
     }
 
     h1 {
@@ -45,7 +45,6 @@
       font-weight: 800;
       text-shadow: 0 0 10px #00ff66, 0 0 20px #00ff66, 0 0 40px #00ff66;
       letter-spacing: 2px;
-      padding: 0 20px;
       animation: pulse 2.5s infinite ease-in-out;
     }
 
@@ -60,15 +59,22 @@
       }
     }
 
+    .buttons {
+      margin-top: 35px;
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
     .btn {
-      margin-top: 30px;
       display: inline-block;
       padding: 16px 34px;
       background: transparent;
       color: #00ff66;
       border: 2px solid #00ff66;
       border-radius: 999px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       text-decoration: none;
       text-transform: uppercase;
@@ -89,7 +95,6 @@
       color: rgba(0, 255, 102, 0.75);
       font-size: 0.95rem;
       letter-spacing: 1px;
-      padding: 0 20px;
     }
   </style>
 </head>
@@ -98,24 +103,35 @@
 
   <div class="overlay">
     <h1>How to escape the matrix</h1>
-    <a class="btn" href="https://forms.gle/oTw7VfSAeQa1fkND7" target="_blank" rel="noopener noreferrer">
-      Enter the portal
-    </a>
-    <div class="subtitle">System override in progress...</div>
+
+    <div class="buttons">
+      <a class="btn" href="https://forms.gle/oTw7VfSAeQa1fkND7" target="_blank" rel="noopener noreferrer">
+        Course 1
+      </a>
+
+      <a class="btn" href="https://forms.gle/FvDtjGLJCbXLqWkG9" target="_blank" rel="noopener noreferrer">
+        Course 2
+      </a>
+    </div>
+
+    <div class="subtitle">Choose your exit route...</div>
   </div>
 
   <script>
     const canvas = document.getElementById("matrix");
     const ctx = canvas.getContext("2d");
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
 
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%".split("");
     const fontSize = 18;
-    const columns = Math.floor(canvas.width / fontSize);
-
-    const drops = Array(columns).fill(1);
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops = Array(columns).fill(1);
 
     function draw() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
@@ -139,8 +155,9 @@
     setInterval(draw, 35);
 
     window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      resizeCanvas();
+      columns = Math.floor(canvas.width / fontSize);
+      drops = Array(columns).fill(1);
     });
   </script>
 </body>
