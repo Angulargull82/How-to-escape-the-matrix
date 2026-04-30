@@ -1,892 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>How to escape the matrix</title>
-  <style>
-    :root{
-      --accent: #00ff66;
-      --accent2: #00d4ff;
-      --bg: #000000;
-      --panel: rgba(6, 12, 8, 0.88);
-      --panel2: rgba(10, 20, 14, 0.95);
-      --text: #d8ffe4;
-      --muted: rgba(216,255,228,0.72);
-      --danger: #ff3b3b;
-      --gold: #ffe66d;
-      --shadow: rgba(0,255,102,0.35);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to escape the matrix</title>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+:root{
+  --accent:#00ff66;
+  --bg:#000;
+}
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--bg);
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--text);
-    }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-    body.glitch {
-      animation: glitchBg 0.18s infinite linear;
-    }
+body{
+  background:var(--bg);
+  overflow:hidden;
+  font-family:Arial, Helvetica, sans-serif;
+}
 
-    @keyframes glitchBg {
-      0% { filter: hue-rotate(0deg) contrast(1); }
-      25% { filter: hue-rotate(14deg) contrast(1.15); }
-      50% { filter: hue-rotate(-8deg) contrast(1.05); }
-      75% { filter: hue-rotate(18deg) contrast(1.2); }
-      100% { filter: hue-rotate(0deg) contrast(1); }
-    }
+/* MATRIX CANVAS */
+canvas{
+  position:fixed;
+  top:0;left:0;
+  z-index:0;
+}
 
-    canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-    }
+/* MAIN CONTENT */
+.overlay{
+  position:relative;
+  z-index:2;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
 
-    .scanlines {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.03) 0px,
-        rgba(255,255,255,0.03) 1px,
-        transparent 2px,
-        transparent 5px
-      );
-      mix-blend-mode: screen;
-      opacity: 0.25;
-    }
+h1{
+  color:var(--accent);
+  font-size:clamp(3rem,7vw,6rem);
+  text-shadow:0 0 20px var(--accent);
+  animation:pulse 2.5s infinite;
+}
 
-    .vignette {
-      position: fixed;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.16) 55%, rgba(0,0,0,0.76) 100%);
-    }
+@keyframes pulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.05);}
+}
 
-    .app {
-      position: relative;
-      z-index: 3;
-      width: 100%;
-      height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 16px;
-      padding: 16px;
-    }
+.buttons{
+  margin-top:30px;
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      padding: 14px 16px;
-      background: var(--panel);
-      border: 1px solid rgba(0,255,102,0.18);
-      border-radius: 22px;
-      box-shadow: 0 0 30px rgba(0,255,102,0.08);
-      backdrop-filter: blur(10px);
-    }
+.btn{
+  padding:16px 32px;
+  background:var(--accent);
+  color:#000;
+  border:none;
+  border-radius:999px;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:none;
+  box-shadow:0 0 20px rgba(0,255,102,0.6);
+  transition:.2s;
+}
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+.btn:hover{
+  transform:translateY(-2px);
+}
 
-    .brand h2 {
-      font-size: 1rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent);
-      text-shadow: 0 0 12px rgba(0,255,102,0.6);
-    }
+/* MENU BUTTON */
+.menu-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  z-index:3;
+  background:var(--accent);
+  color:#000;
+  border:none;
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:20px;
+  cursor:pointer;
+}
 
-    .brand p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
+/* SIDE MENU */
+.sidebar{
+  position:fixed;
+  top:0;
+  left:-300px;
+  width:300px;
+  height:100%;
+  background:#050a07;
+  border-right:2px solid var(--accent);
+  padding:20px;
+  transition:.3s;
+  z-index:4;
+  overflow-y:auto;
+}
 
-    .status {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-    }
+.sidebar.active{
+  left:0;
+}
 
-    .chip {
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(0,255,102,0.12);
-      border: 1px solid rgba(0,255,102,0.24);
-      color: var(--text);
-      font-size: 0.86rem;
-      letter-spacing: 0.4px;
-      box-shadow: inset 0 0 12px rgba(0,255,102,0.08);
-      white-space: nowrap;
-    }
+.sidebar h2{
+  color:var(--accent);
+  margin-bottom:15px;
+}
 
-    .hero {
-      display: grid;
-      place-items: center;
-      text-align: center;
-      padding: 10px;
-      min-height: 0;
-    }
+.side-btn{
+  display:block;
+  width:100%;
+  margin-bottom:10px;
+  padding:12px;
+  background:#0f1e15;
+  color:var(--accent);
+  border:1px solid var(--accent);
+  border-radius:10px;
+  cursor:pointer;
+}
 
-    .hero-inner {
-      width: min(980px, 100%);
-      display: grid;
-      gap: 18px;
-      justify-items: center;
-    }
-
-    h1 {
-      font-size: clamp(2.6rem, 7vw, 6.4rem);
-      line-height: 0.95;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      color: var(--accent);
-      text-shadow:
-        0 0 10px rgba(0,255,102,0.8),
-        0 0 24px rgba(0,255,102,0.55),
-        0 0 48px rgba(0,255,102,0.25);
-      animation: pulse 2.8s ease-in-out infinite;
-      word-break: break-word;
-      padding: 0 12px;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0,255,102,0.2)); }
-      50% { transform: scale(1.03); filter: drop-shadow(0 0 16px rgba(0,255,102,0.5)); }
-    }
-
-    .subtitle {
-      max-width: 740px;
-      color: var(--muted);
-      font-size: clamp(0.98rem, 1.6vw, 1.14rem);
-      line-height: 1.6;
-      letter-spacing: 0.25px;
-    }
-
-    .main-buttons {
-      display: grid;
-      gap: 14px;
-      width: min(940px, 100%);
-    }
-
-    .course-row, .tool-row, .mini-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    .btn {
-      appearance: none;
-      border: 0;
-      border-radius: 18px;
-      padding: 14px 18px;
-      font-size: 0.95rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background 0.18s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      min-width: 170px;
-      min-height: 52px;
-      background: var(--accent);
-      color: #051108;
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.08) inset,
-        0 10px 26px rgba(0,0,0,0.34),
-        0 0 20px var(--shadow);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px) scale(1.01);
-      filter: brightness(1.08);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.14) inset,
-        0 12px 30px rgba(0,0,0,0.38),
-        0 0 24px rgba(0,255,102,0.6);
-    }
-
-    .btn.secondary {
-      background: var(--accent2);
-      color: #031117;
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.08) inset,
-        0 10px 26px rgba(0,0,0,0.34),
-        0 0 20px rgba(0,212,255,0.26);
-    }
-
-    .btn.secondary:hover {
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.14) inset,
-        0 12px 30px rgba(0,0,0,0.38),
-        0 0 24px rgba(0,212,255,0.54);
-    }
-
-    .btn.ghost {
-      background: #0f1e15;
-      color: var(--text);
-      border: 1px solid rgba(0,255,102,0.24);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.04) inset,
-        0 10px 24px rgba(0,0,0,0.32),
-        0 0 18px rgba(0,255,102,0.12);
-    }
-
-    .btn.danger {
-      background: var(--danger);
-      color: white;
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.08) inset,
-        0 10px 24px rgba(0,0,0,0.32),
-        0 0 18px rgba(255,59,59,0.24);
-    }
-
-    .btn.gold {
-      background: var(--gold);
-      color: #1d1800;
-    }
-
-    .panel {
-      width: min(1100px, 100%);
-      margin: 0 auto;
-      padding: 14px;
-      background: var(--panel2);
-      border: 1px solid rgba(0,255,102,0.18);
-      border-radius: 22px;
-      box-shadow: 0 0 34px rgba(0,255,102,0.08);
-      backdrop-filter: blur(10px);
-    }
-
-    .panel-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 14px;
-    }
-
-    .box {
-      border-radius: 18px;
-      border: 1px solid rgba(0,255,102,0.16);
-      padding: 14px;
-      background: rgba(0,0,0,0.26);
-    }
-
-    .box h3 {
-      font-size: 0.95rem;
-      color: var(--accent);
-      margin-bottom: 8px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-    }
-
-    .box p, .box li {
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
-
-    .box ul {
-      padding-left: 18px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .stat {
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(0,255,102,0.08);
-      border: 1px solid rgba(0,255,102,0.12);
-    }
-
-    .stat .label {
-      color: var(--muted);
-      font-size: 0.78rem;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-    }
-
-    .stat .value {
-      color: var(--text);
-      font-size: 1.08rem;
-      font-weight: 800;
-      margin-top: 4px;
-    }
-
-    .log {
-      margin-top: 10px;
-      height: 120px;
-      overflow: auto;
-      padding-right: 6px;
-      scrollbar-width: thin;
-    }
-
-    .log-item {
-      padding: 8px 10px;
-      margin-bottom: 8px;
-      border-radius: 12px;
-      background: rgba(0,0,0,0.25);
-      border: 1px solid rgba(0,255,102,0.1);
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      color: rgba(216,255,228,0.68);
-      font-size: 0.84rem;
-      padding: 0 4px 4px;
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: none;
-      place-items: center;
-      background: rgba(0,0,0,0.68);
-      backdrop-filter: blur(6px);
-      padding: 18px;
-    }
-
-    .modal.show {
-      display: grid;
-    }
-
-    .modal-card {
-      width: min(720px, 100%);
-      border-radius: 24px;
-      border: 1px solid rgba(0,255,102,0.2);
-      background: rgba(5, 12, 7, 0.96);
-      box-shadow: 0 0 44px rgba(0,255,102,0.12);
-      padding: 20px;
-    }
-
-    .modal-card h3 {
-      color: var(--accent);
-      font-size: 1.2rem;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1.4px;
-    }
-
-    .modal-card p {
-      color: var(--muted);
-      line-height: 1.6;
-      margin-bottom: 12px;
-    }
-
-    .modal-card .row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      margin-top: 14px;
-    }
-
-    .hint {
-      color: rgba(216,255,228,0.62);
-      font-size: 0.88rem;
-    }
-
-    @media (max-width: 900px) {
-      .panel-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .app {
-        padding: 12px;
-        gap: 12px;
-      }
-
-      .topbar {
-        padding: 12px;
-      }
-
-      .btn {
-        min-width: 100%;
-      }
-
-      .stats {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+/* MATRIX */
+</style>
 </head>
+
 <body>
-  <canvas id="matrix"></canvas>
-  <div class="scanlines"></div>
-  <div class="vignette"></div>
 
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <h2>Matrix Exit Console</h2>
-        <p id="subtitleLine">Choose a path. The machine is watching, politely.</p>
-      </div>
+<canvas id="matrix"></canvas>
 
-      <div class="status">
-        <div class="chip">⏱ <span id="clock">--:--:--</span></div>
-        <div class="chip">⚡ <span id="rainState">Rain: ON</span></div>
-        <div class="chip">🔊 <span id="soundState">Sound: OFF</span></div>
-        <div class="chip">🎨 <span id="accentState">Accent: Green</span></div>
-      </div>
-    </header>
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-    <main class="hero">
-      <div class="hero-inner">
-        <h1 id="mainTitle">How to escape the matrix</h1>
-        <div class="subtitle" id="mainSubtitle">
-          A neon gate with extra controls, solid buttons, and enough matrix static to make the wallpaper sweat a little.
-        </div>
+<div class="sidebar" id="sidebar">
+  <h2>Controls</h2>
 
-        <div class="main-buttons">
-          <div class="course-row">
-            <a class="btn" href="https://forms.gle/oTw7VfSAeQa1fkND7" target="_blank" rel="noopener noreferrer">Course 1</a>
-            <a class="btn secondary" href="https://forms.gle/FvDtjGLJCbXLqWkG9" target="_blank" rel="noopener noreferrer">Course 2</a>
-          </div>
+  <button class="side-btn" onclick="toggleRain()">Toggle Rain</button>
+  <button class="side-btn" onclick="faster()">Faster</button>
+  <button class="side-btn" onclick="slower()">Slower</button>
+  <button class="side-btn" onclick="glitch()">Glitch</button>
+  <button class="side-btn" onclick="changeColor()">Change Color</button>
+  <button class="side-btn" onclick="randomTitle()">Random Title</button>
+  <button class="side-btn" onclick="copyLink(1)">Copy Course 1</button>
+  <button class="side-btn" onclick="copyLink(2)">Copy Course 2</button>
+  <button class="side-btn" onclick="resetAll()">Reset</button>
+</div>
 
-          <div class="tool-row">
-            <button class="btn ghost" id="btnFullscreen">Fullscreen</button>
-            <button class="btn ghost" id="btnRainToggle">Toggle Rain</button>
-            <button class="btn ghost" id="btnFaster">Faster Rain</button>
-            <button class="btn ghost" id="btnSlower">Slower Rain</button>
-            <button class="btn ghost" id="btnGlitch">Glitch Mode</button>
-          </div>
+<div class="overlay">
+  <h1 id="title">How to escape the matrix</h1>
 
-          <div class="tool-row">
-            <button class="btn ghost" id="btnAccent">Change Accent</button>
-            <button class="btn ghost" id="btnSound">Sound On/Off</button>
-            <button class="btn ghost" id="btnBurst">Matrix Burst</button>
-            <button class="btn ghost" id="btnRandomTitle">Random Title</button>
-            <button class="btn ghost" id="btnHelp">Help / Shortcuts</button>
-          </div>
-
-          <div class="mini-row">
-            <button class="btn gold" id="btnCopy1">Copy Course 1</button>
-            <button class="btn gold" id="btnCopy2">Copy Course 2</button>
-            <button class="btn gold" id="btnCopyBoth">Copy Both Links</button>
-            <button class="btn danger" id="btnReset">Reset Everything</button>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <section class="panel">
-      <div class="panel-grid">
-        <div class="box">
-          <h3>System Notes</h3>
-          <ul>
-            <li>Solid buttons instead of transparent ones, so they hit like neon bricks.</li>
-            <li>Matrix rain can be toggled, sped up, slowed down, or blasted into burst mode.</li>
-            <li>Accent color cycles through several modes to keep the portal looking lively.</li>
-            <li>Sound is generated locally in the browser with tiny synth beeps.</li>
-            <li>Fullscreen, copy-link tools, glitch mode, random titles, and a help modal are built in.</li>
-          </ul>
-          <div class="hint" style="margin-top: 10px;">Tip: press <b>G</b> for glitch, <b>R</b> for rain, <b>S</b> for sound, <b>F</b> for fullscreen, <b>H</b> for help.</div>
-        </div>
-
-        <div class="box">
-          <h3>Live Status</h3>
-          <div class="stats">
-            <div class="stat">
-              <div class="label">Rain Speed</div>
-              <div class="value" id="speedValue">35 ms</div>
-            </div>
-            <div class="stat">
-              <div class="label">Accent Mode</div>
-              <div class="value" id="accentValue">Green</div>
-            </div>
-            <div class="stat">
-              <div class="label">Glitch</div>
-              <div class="value" id="glitchValue">Off</div>
-            </div>
-            <div class="stat">
-              <div class="label">Visible Lines</div>
-              <div class="value" id="columnsValue">0</div>
-            </div>
-          </div>
-
-          <div class="log" id="log"></div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <div>Press the buttons, bend the grid, escape the grid. Tiny cyber theater included.</div>
-      <div id="footerText">Ready.</div>
-    </footer>
+  <div class="buttons">
+    <a class="btn" href="https://forms.gle/oTw7VfSAeQa1fkND7" target="_blank">Course 1</a>
+    <a class="btn" href="https://forms.gle/FvDtjGLJCbXLqWkG9" target="_blank">Course 2</a>
   </div>
+</div>
 
-  <div class="modal" id="helpModal">
-    <div class="modal-card">
-      <h3>Help / Shortcuts</h3>
-      <p><b>R</b> toggles rain, <b>G</b> toggles glitch mode, <b>S</b> toggles sound, <b>F</b> toggles fullscreen, <b>H</b> opens this panel.</p>
-      <p><b>Course 1</b> and <b>Course 2</b> are the two red-pill exits. The rest are decorative controls for a more alive-looking page.</p>
-      <p>Everything is in one HTML file, so you can paste it straight into GitHub Pages or any static host.</p>
-      <div class="row">
-        <button class="btn ghost" id="closeHelp">Close</button>
-      </div>
-    </div>
-  </div>
+<script>
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
 
-  <script>
-    const course1 = "https://forms.gle/oTw7VfSAeQa1fkND7";
-    const course2 = "https://forms.gle/FvDtjGLJCbXLqWkG9";
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
+let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
+let fontSize = 18;
+let columns = canvas.width/fontSize;
+let drops = Array(Math.floor(columns)).fill(1);
 
-    const clockEl = document.getElementById("clock");
-    const rainStateEl = document.getElementById("rainState");
-    const soundStateEl = document.getElementById("soundState");
-    const accentStateEl = document.getElementById("accentState");
-    const subtitleLineEl = document.getElementById("subtitleLine");
-    const mainTitleEl = document.getElementById("mainTitle");
-    const mainSubtitleEl = document.getElementById("mainSubtitle");
-    const speedValueEl = document.getElementById("speedValue");
-    const accentValueEl = document.getElementById("accentValue");
-    const glitchValueEl = document.getElementById("glitchValue");
-    const columnsValueEl = document.getElementById("columnsValue");
-    const logEl = document.getElementById("log");
-    const footerTextEl = document.getElementById("footerText");
-    const helpModal = document.getElementById("helpModal");
+let speed = 35;
+let running = true;
+let color = "#00ff66";
 
-    const state = {
-      running: true,
-      glitch: false,
-      sound: false,
-      accentIndex: 0,
-      fontSize: 18,
-      trailAlpha: 0.08,
-      speedMs: 35,
-      letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%".split(""),
-      colors: [
-        { name: "Green", value: "#00ff66", shadow: "rgba(0,255,102,0.35)" },
-        { name: "Cyan", value: "#00d4ff", shadow: "rgba(0,212,255,0.30)" },
-        { name: "Pink", value: "#ff4dff", shadow: "rgba(255,77,255,0.26)" },
-        { name: "Amber", value: "#ffcc33", shadow: "rgba(255,204,51,0.28)" }
-      ],
-      audioCtx: null,
-      lastDraw: 0,
-      frameCount: 0,
-      burstUntil: 0
-    };
+function draw(){
+  if(!running) return;
 
-    let drops = [];
+  ctx.fillStyle="rgba(0,0,0,0.08)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    function applyAccent() {
-      const color = state.colors[state.accentIndex];
-      document.documentElement.style.setProperty("--accent", color.value);
-      document.documentElement.style.setProperty("--shadow", color.shadow);
-      accentStateEl.textContent = `Accent: ${color.name}`;
-      accentValueEl.textContent = color.name;
+  ctx.fillStyle=color;
+  ctx.font=fontSize+"px monospace";
+
+  for(let i=0;i<drops.length;i++){
+    let text = letters[Math.floor(Math.random()*letters.length)];
+    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+
+    if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
+      drops[i]=0;
     }
+    drops[i]++;
+  }
+}
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      rebuildDrops();
-      columnsValueEl.textContent = String(drops.length);
-    }
+setInterval(draw,speed);
 
-    function rebuildDrops() {
-      const columns = Math.floor(canvas.width / state.fontSize);
-      drops = Array.from({ length: columns }, () => Math.floor(Math.random() * 8));
-      columnsValueEl.textContent = String(columns);
-    }
+/* MENU */
+function toggleMenu(){
+  document.getElementById("sidebar").classList.toggle("active");
+}
 
-    function drawMatrix() {
-      ctx.fillStyle = `rgba(0, 0, 0, ${state.trailAlpha})`;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+/* FUNCTIONS */
+function toggleRain(){
+  running=!running;
+}
 
-      const color = state.colors[state.accentIndex].value;
-      ctx.fillStyle = color;
-      ctx.font = `${state.fontSize}px monospace`;
+function faster(){
+  speed=Math.max(10,speed-5);
+}
 
-      for (let i = 0; i < drops.length; i++) {
-        const char = state.letters[Math.floor(Math.random() * state.letters.length)];
-        const x = i * state.fontSize;
-        const y = drops[i] * state.fontSize;
+function slower(){
+  speed+=5;
+}
 
-        ctx.fillText(char, x, y);
+function glitch(){
+  document.body.style.filter="hue-rotate("+(Math.random()*360)+"deg)";
+}
 
-        const burst = performance.now() < state.burstUntil;
-        if (burst && Math.random() > 0.88) {
-          drops[i] = 0;
-        } else if (y > canvas.height && Math.random() > (burst ? 0.92 : 0.975)) {
-          drops[i] = 0;
-        }
+function changeColor(){
+  const colors=["#00ff66","#00d4ff","#ff00ff","#ffff00"];
+  color=colors[Math.floor(Math.random()*colors.length)];
+  document.documentElement.style.setProperty('--accent',color);
+}
 
-        drops[i]++;
-      }
+function randomTitle(){
+  const titles=[
+    "Escape protocol",
+    "Break the system",
+    "Wake up",
+    "You are not free",
+    "Exit the illusion"
+  ];
+  document.getElementById("title").innerText=
+    titles[Math.floor(Math.random()*titles.length)];
+}
 
-      state.frameCount++;
-      if (state.frameCount % 15 === 0) {
-        columnsValueEl.textContent = String(drops.length);
-      }
-    }
+function copyLink(n){
+  const links=[
+    "https://forms.gle/oTw7VfSAeQa1fkND7",
+    "https://forms.gle/FvDtjGLJCbXLqWkG9"
+  ];
+  navigator.clipboard.writeText(links[n-1]);
+}
 
-    function loop(timestamp) {
-      if (!state.running) {
-        requestAnimationFrame(loop);
-        return;
-      }
+function resetAll(){
+  location.reload();
+}
+</script>
 
-      if (timestamp - state.lastDraw >= state.speedMs) {
-        drawMatrix();
-        state.lastDraw = timestamp;
-      }
-
-      requestAnimationFrame(loop);
-    }
-
-    function log(message) {
-      const item = document.createElement("div");
-      item.className = "log-item";
-      item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      logEl.prepend(item);
-
-      while (logEl.children.length > 6) {
-        logEl.removeChild(logEl.lastChild);
-      }
-
-      footerTextEl.textContent = message;
-    }
-
-    function beep(freq = 520, duration = 0.08, type = "sine", gain = 0.05) {
-      if (!state.sound) return;
-
-      if (!state.audioCtx) {
-        state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-
-      const audioCtx = state.audioCtx;
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.type = type;
-      oscillator.frequency.value = freq;
-      gainNode.gain.value = gain;
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + duration);
-    }
-
-    function toggleSound() {
-      state.sound = !state.sound;
-      soundStateEl.textContent = `Sound: ${state.sound ? "ON" : "OFF"}`;
-      log(state.sound ? "Sound systems online." : "Sound muted.");
-      beep(700, 0.09, "square", 0.04);
-    }
-
-    function toggleRain() {
-      state.running = !state.running;
-      rainStateEl.textContent = `Rain: ${state.running ? "ON" : "OFF"}`;
-      log(state.running ? "Matrix rain resumed." : "Matrix rain paused.");
-      beep(state.running ? 620 : 250, 0.08, "triangle", 0.045);
-    }
-
-    function fasterRain() {
-      state.speedMs = Math.max(12, state.speedMs - 6);
-      speedValueEl.textContent = `${state.speedMs} ms`;
-      log("Rain speed increased.");
-      beep(780, 0.05, "sine", 0.04);
-    }
-
-    function slowerRain() {
-      state.speedMs = Math.min(90, state.speedMs + 6);
-      speedValueEl.textContent = `${state.speedMs} ms`;
-      log("Rain speed decreased.");
-      beep(330, 0.05, "sine", 0.04);
-    }
-
-    function cycleAccent() {
-      state.accentIndex = (state.accentIndex + 1) % state.colors.length;
-      applyAccent();
-      log(`Accent changed to ${state.colors[state.accentIndex].name}.`);
-      beep(540 + state.accentIndex * 110, 0.08, "triangle", 0.045);
-    }
-
-    function toggleGlitch() {
-      state.glitch = !state.glitch;
-      document.body.classList.toggle("glitch", state.glitch);
-      glitchValueEl.textContent = state.glitch ? "On" : "Off";
-      log(state.glitch ? "Glitch mode enabled." : "Glitch mode disabled.");
-      beep(state.glitch ? 920 : 260, 0.08, "sawtooth", 0.035);
-    }
-
-    function burstMatrix() {
-      state.burstUntil = performance.now() + 2000;
-      state.trailAlpha = 0.045;
-      log("Matrix burst initiated.");
-      beep(1000, 0.08, "square", 0.04);
-      setTimeout(() => {
-        state.trailAlpha = 0.08;
-      }, 2000);
-    }
-
-    function randomTitle() {
-      const titles = [
-        "How to escape the matrix",
-        "Exit protocol engaged",
-        "Choose your pill",
-        "Signal breach detected",
-        "The grid is talking",
-        "Portal ready",
-        "Decrypt the wallpaper",
-        "Reality loading..."
-      ];
-      const subs = [
-        "A neon gate with extra controls, solid buttons, and enough matrix static to make the wallpaper sweat a little.",
-        "The code hums. The wires blink. The buttons remain gloriously solid.",
-        "A tiny portal with a loud attitude and a green heartbeat.",
-        "Press things. Make sparks. Open the form doors."
-      ];
-      mainTitleEl.textContent = titles[Math.floor(Math.random() * titles.length)];
-      mainSubtitleEl.textContent = subs[Math.floor(Math.random() * subs.length)];
-      subtitleLineEl.textContent = "The machine noticed your curiosity. It approves, reluctantly.";
-      log("Title randomized.");
-      beep(600, 0.07, "triangle", 0.04);
-    }
-
-    function copyText(text, label) {
-      navigator.clipboard.writeText(text).then(() => {
-        log(`${label} copied to clipboard.`);
-        beep(760, 0.06, "sine", 0.04);
-      }).catch(() => {
-        log(`Copy failed for ${label}.`);
-      });
-    }
-
-    async function toggleFullscreen() {
-      try {
-        if (!document.fullscreenElement) {
-          await document.documentElement.requestFullscreen();
-          log("Fullscreen activated.");
-        } else {
-          await document.exitFullscreen();
-          log("Exited fullscreen.");
-        }
-        beep(680, 0.06, "triangle", 0.04);
-      } catch {
-        log("Fullscreen not available here.");
-      }
-    }
-
-    function showHelp() {
-      helpModal.classList.add("show");
-      log("Help opened.");
-      beep(520, 0.06, "sine", 0.03);
-    }
-
-    function hideHelp() {
-      helpModal.classList.remove("show");
-      log("Help closed.");
-      beep(420, 0.05, "sine", 0.03);
-    }
-
-    function resetAll() {
-      state.running = true;
-      state.glitch = false;
-      state.sound = false;
-      state.accentIndex = 0;
-      state.speedMs = 35;
-      state.trailAlpha = 0.08;
-      state.fontSize = 18;
-      state.burstUntil = 0;
-
-      document.body.classList.remove("glitch");
-      rainStateEl.textContent = "Rain: ON";
-      soundStateEl.textContent = "Sound: OFF";
-      glitchValueEl.textContent = "Off";
-      speedValueEl.textContent = `${state.speedMs} ms`;
-      mainTitleEl.textContent = "How to escape the matrix";
-      mainSubtitleEl.textContent = "A neon gate with extra controls, solid buttons, and enough matrix static to make the wallpaper sweat a little.";
-      subtitleLineEl.textContent = "Choose a path. The machine is watching, politely.";
-      applyAccent();
-      resizeCanvas();
-      log("Everything reset.");
-    }
-
-    function updateClock() {
-      clockEl.textContent = new Date().toLocaleTimeString();
-    }
-
-    document.getElementById("btnFullscreen").addEventListener("click", toggleFullscreen);
-    document.getElementById("btnRainToggle").addEventListener("click", toggleRain);
-    document.getElementById("btnFaster").addEventListener("click", fasterRain);
-    document.getElementById("btnSlower").addEventListener("click", slowerRain);
-    document.getElementById("btnGlitch").addEventListener("click", toggleGlitch);
-    document.getElementById("btnAccent").addEventListener("click", cycleAccent);
-    document.getElementById("btnSound").addEventListener("click", toggleSound);
-    document.getElementById("btnBurst").addEventListener("click", burstMatrix);
-    document.getElementById("btnRandomTitle").addEventListener("click", randomTitle);
-    document.getElementById("btnHelp").addEventListener("click", showHelp);
-    document.getElementById("btnCopy1").addEventListener("click", () => copyText(course1, "Course 1 link"));
-    document.getElementById("btnCopy2").addEventListener("click", () => copyText(course2, "Course 2 link"));
-    document.getElementById("btnCopyBoth").addEventListener("click", () => copyText(`${course1}\n${course2}`, "Both links"));
-    document.getElementById("btnReset").addEventListener("click", resetAll);
-    document.getElementById("closeHelp").addEventListener("click", hideHelp);
-    helpModal.addEventListener("click", (e) => {
-      if (e.target === helpModal) hideHelp();
-    });
-
-    window.addEventListener("resize", resizeCanvas);
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "g" || e.key === "G") toggleGlitch();
-      if (e.key === "r" || e.key === "R") toggleRain();
-      if (e.key === "s" || e.key === "S") toggleSound();
-      if (e.key === "f" || e.key === "F") toggleFullscreen();
-      if (e.key === "h" || e.key === "H") showHelp();
-      if (e.key === "Escape") hideHelp();
-    });
-
-    applyAccent();
-    resizeCanvas();
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    log("Matrix console booted.");
-    log("Course links loaded.");
-    log("Controls online.");
-
-    requestAnimationFrame(loop);
-  </script>
 </body>
 </html>
